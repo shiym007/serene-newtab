@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Serene · 极简新标签页",
+  "version": "1.5.0",
+  "description": "极简新标签页：多样式时钟、Bing 联想与历史置顶、聚焦高斯模糊、可自定义图片/视频背景、自由布局与独立快捷方式。",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": ["storage", "unlimitedStorage"],
+  "host_permissions": ["https://*.bing.com/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bing.com/search*",
+        "https://cn.bing.com/search*",
+        "https://www.bing.com/images/search*",
+        "https://cn.bing.com/images/search*"
+      ],
+      "js": ["bing-history.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

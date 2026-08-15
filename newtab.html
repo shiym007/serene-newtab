@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>新标签页</title>
+  <link rel="stylesheet" href="newtab.css" />
+</head>
+<body>
+  <!-- 背景层（渐变/图片/MP4 视频，聚焦时高斯模糊） -->
+  <div id="bgLayer" aria-hidden="true">
+    <div id="bg"></div>
+    <video id="bgVideo" autoplay muted loop playsinline disablepictureinpicture></video>
+  </div>
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="wordmark">SERENE</div>
+    <button id="settingsBtn" class="icon-btn" aria-label="设置" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </header>
+
+  <main id="stage">
+    <!-- 时钟块（可拖动 / 缩放 / 居中吸附） -->
+    <div id="clockGroup" class="block">
+      <div id="clockRow" class="reveal r1">
+        <div id="clock" aria-live="off"></div>
+        <div id="ampm"></div>
+      </div>
+      <div id="dateRow" class="reveal r2 date-dot">
+        <span id="dateText"></span>
+      </div>
+    </div>
+
+    <!-- 搜索块（可拖动 / 缩放 / 居中吸附） -->
+    <div id="searchWrap" class="block">
+      <div id="searchBox" class="reveal r3">
+        <svg class="s-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+        <input id="searchInput" type="text" placeholder="搜索或输入网址" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="搜索" />
+      </div>
+    </div>
+    <!-- 快捷方式图标由 JS 逐个追加为独立块 -->
+  </main>
+
+  <!-- 联想下拉（独立于缩放块，fixed 自适应屏幕） -->
+  <div id="suggest" hidden><div class="sg-scroll" id="sgScroll"></div></div>
+
+  <!-- 居中吸附辅助线 -->
+  <div id="guideV" aria-hidden="true"></div>
+  <div id="guideH" aria-hidden="true"></div>
+
+  <!-- 布局编辑模式的完成按钮 -->
+  <button id="editDone" type="button">完成布局</button>
+
+  <div id="scrim"></div>
+
+  <!-- 设置面板 -->
+  <aside id="panel" aria-hidden="true">
+    <div class="panel-head">
+      <h2>设置</h2>
+      <button id="closePanel" class="icon-btn" aria-label="关闭设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="sec-label">背景 · 预设</div>
+    <div id="swatches"></div>
+
+    <div class="sec-label">背景 · 自定义</div>
+    <div class="custom-row">
+      <input id="bgUrl" type="url" placeholder="图片 / MP4 视频链接 https://…" spellcheck="false" />
+      <button id="applyUrl" class="ghost">应用</button>
+    </div>
+    <label class="ghost wide" for="bgFile">上传图片或 MP4 视频</label>
+    <input id="bgFile" type="file" accept="image/*,video/mp4,video/webm" hidden />
+    <div id="customChip" class="chip" hidden>
+      <span>正在使用自定义背景</span>
+      <button id="clearCustom">移除</button>
+    </div>
+
+    <div class="sec-label">时钟样式</div>
+    <div id="clockStyles">
+      <button class="cs" type="button" data-style="serif"><span class="prev f-serif">12:34</span><i>衬线</i></button>
+      <button class="cs" type="button" data-style="light"><span class="prev f-light">12:34</span><i>纤细</i></button>
+      <button class="cs" type="button" data-style="mono"><span class="prev f-mono">12:34</span><i>等宽</i></button>
+      <button class="cs" type="button" data-style="din"><span class="prev f-din">12:34</span><i>简黑</i></button>
+    </div>
+
+    <div class="sec-label">布局</div>
+    <div class="toggle-row"><span>编辑布局</span>
+      <label class="switch"><input type="checkbox" id="optEdit" /><span class="track"><i></i></span></label>
+    </div>
+    <p class="hint">开启后：拖动时钟 / 搜索框 / 每个快捷方式图标调整位置（靠近屏幕中心自动吸附），滚轮悬停可缩放。双击快捷方式图标可编辑。</p>
+    <button id="resetLayout" class="ghost wide" type="button">重置布局</button>
+
+    <div class="sec-label">快捷方式</div>
+    <div class="toggle-row"><span>显示名称</span>
+      <label class="switch"><input type="checkbox" id="optLinkNames" checked /><span class="track"><i></i></span></label>
+    </div>
+    <div id="linkList"></div>
+    <button id="addLink" class="ghost wide" type="button">添加快捷方式</button>
+    <p class="hint">每个网站一个独立图标，可单独移动缩放。图标留空时自动使用网站图标，失败则显示首字母。聚焦搜索时图标自动隐去，点击图标在新标签页打开。</p>
+
+    <div class="sec-label">搜索联想</div>
+    <div class="toggle-row"><span>记录搜索历史</span>
+      <label class="switch"><input type="checkbox" id="optHistory" checked /><span class="track"><i></i></span></label>
+    </div>
+    <p class="hint">输入时会将你的历史记录置顶显示（带时钟图标），其后为 Bing 联想。在浏览器任意位置用 Bing 搜索（含地址栏、Bing 页内）都会自动记录。悬停联想条目可单独删除。</p>
+    <div id="histList" class="hist-list"></div>
+    <button id="clearHistory" class="ghost wide" type="button">清空搜索历史</button>
+
+    <div class="sec-label">时间</div>
+    <div class="toggle-row"><span>24 小时制</span>
+      <label class="switch"><input type="checkbox" id="optH24" /><span class="track"><i></i></span></label>
+    </div>
+    <div class="toggle-row"><span>显示秒数</span>
+      <label class="switch"><input type="checkbox" id="optSeconds" /><span class="track"><i></i></span></label>
+    </div>
+    <div class="toggle-row"><span>显示日期</span>
+      <label class="switch"><input type="checkbox" id="optDate" /><span class="track"><i></i></span></label>
+    </div>
+    <div id="dateStyles">
+      <button class="ds" type="button" data-style="dot"><span>2026.08.16</span><i>点阵</i></button>
+      <button class="ds" type="button" data-style="cn"><span>二〇二六年</span><i>汉字</i></button>
+      <button class="ds" type="button" data-style="slash"><span>08 / 16</span><i>斜杠</i></button>
+      <button class="ds" type="button" data-style="en"><span>SUNDAY</span><i>英文</i></button>
+    </div>
+
+    <div class="sec-label">聚焦模糊强度</div>
+    <div class="range-row">
+      <input type="range" id="optBlur" min="8" max="40" step="1" value="26" />
+      <span id="blurVal">26px</span>
+    </div>
+
+    <p class="foot">SERENE · 极简新标签页 · v1.5.0</p>
+  </aside>
+
+  <!-- 快捷方式 编辑对话框 -->
+  <div id="dlgScrim" aria-hidden="true"></div>
+  <div id="linkDialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <h3 id="dlgTitle">添加快捷方式</h3>
+    <div class="dlg-preview">
+      <span class="ic" id="dlgPrevBox"><img id="dlgPrevImg" alt="" /><span id="dlgPrevLt" class="lt"></span></span>
+    </div>
+    <label class="dlg-lb">名称<input id="dlgName" type="text" placeholder="例如：GitHub" spellcheck="false" /></label>
+    <label class="dlg-lb">网址<input id="dlgUrl" type="text" placeholder="example.com 或 https://…" spellcheck="false" /></label>
+    <label class="dlg-lb">图标链接（可选）<input id="dlgIcon" type="text" placeholder="留空自动使用网站图标" spellcheck="false" /></label>
+    <label class="ghost mini" for="dlgIconFile">或上传本地图标</label>
+    <input id="dlgIconFile" type="file" accept="image/*" hidden />
+    <div class="dlg-btns">
+      <button id="dlgCancel" class="ghost" type="button">取消</button>
+      <button id="dlgSave" class="ghost solid" type="button">保存</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script src="newtab.js"></script>
+</body>
+</html>

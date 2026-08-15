@@ -4,7 +4,7 @@
 
 ![version](https://img.shields.io/badge/version-1.5.0-8a7f6a) ![manifest](https://img.shields.io/badge/Manifest-V3-4a6b8c) ![license](https://img.shields.io/badge/license-MIT-56806a)
 
----
+---演示：https://www.bilibili.com/video/BV16Dbm6yEuM/?vd_source=79446381a54aef83c29ad44497bada24
 
 ## 特性
 

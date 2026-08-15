@@ -1,6 +1,6 @@
 # Serene · 极简新标签页
 
-一个由AI打造的为 Edge / Chrome 打造的极简风格新标签页扩展：大字时钟、Bing 搜索联想、可自定义背景（含动态视频）、自由拖拽布局、独立快捷方式。**零依赖、零联网追踪、全部数据留在本地。**
+一个由GLM5.3打造的为 Edge / Chrome 打造的极简风格新标签页扩展：大字时钟、Bing 搜索联想、可自定义背景（含动态视频）、自由拖拽布局、独立快捷方式。**零依赖、零联网追踪、全部数据留在本地。**
 
 ![version](https://img.shields.io/badge/version-1.5.0-8a7f6a) ![manifest](https://img.shields.io/badge/Manifest-V3-4a6b8c) ![license](https://img.shields.io/badge/license-MIT-56806a)
 

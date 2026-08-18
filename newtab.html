@@ -29,7 +29,11 @@
         <div id="clock" aria-live="off"></div>
         <div id="ampm"></div>
       </div>
-      <div id="dateRow" class="reveal r2 date-dot">
+    </div>
+
+    <!-- 日期块（独立可拖动 / 缩放 / 字体 / 自定义格式） -->
+    <div id="dateGroup" class="block">
+      <div id="dateRow" class="reveal r2">
         <span id="dateText"></span>
       </div>
     </div>
@@ -65,11 +69,55 @@
       </button>
     </div>
 
-    <div class="sec-label">背景 · 预设</div>
-    <div id="swatches"></div>
+    <div class="sec-label">界面</div>
+    <div class="toggle-row"><span>左上角 SERENE 字样</span>
+      <label class="switch"><input type="checkbox" id="optMark" checked /><span class="track"><i></i></span></label>
+    </div>
 
-    <div class="sec-label">背景 · 自定义</div>
-    <div class="custom-row">
+    <div class="sec-label">时间</div>
+    <div class="toggle-row"><span>显示时钟</span>
+      <label class="switch"><input type="checkbox" id="optClock" checked /><span class="track"><i></i></span></label>
+    </div>
+    <div id="clockStyles">
+      <button class="cs" type="button" data-style="serif"><span class="prev f-serif">12:34</span><i>衬线</i></button>
+      <button class="cs" type="button" data-style="light"><span class="prev f-light">12:34</span><i>纤细</i></button>
+      <button class="cs" type="button" data-style="mono"><span class="prev f-mono">12:34</span><i>等宽</i></button>
+      <button class="cs" type="button" data-style="din"><span class="prev f-din">12:34</span><i>简黑</i></button>
+    </div>
+    <div class="toggle-row"><span>时钟加粗</span>
+      <label class="switch"><input type="checkbox" id="optClockBold" /><span class="track"><i></i></span></label>
+    </div>
+    <div class="toggle-row"><span>24 小时制</span>
+      <label class="switch"><input type="checkbox" id="optH24" checked /><span class="track"><i></i></span></label>
+    </div>
+    <div class="toggle-row"><span>显示秒数</span>
+      <label class="switch"><input type="checkbox" id="optSeconds" /><span class="track"><i></i></span></label>
+    </div>
+
+    <div class="sec-label">日期</div>
+    <div class="toggle-row"><span>显示日期</span>
+      <label class="switch"><input type="checkbox" id="optDate" checked /><span class="track"><i></i></span></label>
+    </div>
+    <div id="dateStyles">
+      <button class="ds" type="button" data-fmt="{Y}.{M}.{D} · {W}"><span>2026.08.16</span><i>点阵</i></button>
+      <button class="ds" type="button" data-fmt="{y}年{m}月{d}日 · {W}"><span>二〇二六年</span><i>汉字</i></button>
+      <button class="ds" type="button" data-fmt="{M} / {D} · {w}"><span>08 / 16</span><i>斜杠</i></button>
+      <button class="ds" type="button" data-fmt="{WE} · {ME} {D}"><span>SUNDAY</span><i>英文</i></button>
+    </div>
+    <label class="dlg-lb" style="margin-top:12px">自定义格式<input id="dateFmt" type="text" spellcheck="false" placeholder="{Y}年{M}月{D}日" /></label>
+    <p class="hint">占位符可任意组合：{Y} 2026 · {y} 二〇二六 · {M} 08 · {m} 八 · {ME} AUGUST · {D} 16 · {d} 十六 · {W} 星期日 · {w} 周日 · {WE} SUNDAY，其余文字原样显示。</p>
+    <div id="dateFonts">
+      <button class="cs" type="button" data-f="serif"><span class="prev f-serif">八月</span><i>衬线</i></button>
+      <button class="cs" type="button" data-f="ui"><span class="prev">八月</span><i>黑体</i></button>
+      <button class="cs" type="button" data-f="mono"><span class="prev f-mono">08-16</span><i>等宽</i></button>
+    </div>
+    <div class="toggle-row"><span>日期加粗</span>
+      <label class="switch"><input type="checkbox" id="optDateBold" /><span class="track"><i></i></span></label>
+    </div>
+
+    <div class="sec-label">背景</div>
+    <div id="swatches"></div>
+    <div class="custom-row" style="margin-top:12px">
       <input id="bgUrl" type="url" placeholder="图片 / MP4 视频链接 https://…" spellcheck="false" />
       <button id="applyUrl" class="ghost">应用</button>
     </div>
@@ -79,62 +127,81 @@
       <span>正在使用自定义背景</span>
       <button id="clearCustom">移除</button>
     </div>
-
-    <div class="sec-label">时钟样式</div>
-    <div id="clockStyles">
-      <button class="cs" type="button" data-style="serif"><span class="prev f-serif">12:34</span><i>衬线</i></button>
-      <button class="cs" type="button" data-style="light"><span class="prev f-light">12:34</span><i>纤细</i></button>
-      <button class="cs" type="button" data-style="mono"><span class="prev f-mono">12:34</span><i>等宽</i></button>
-      <button class="cs" type="button" data-style="din"><span class="prev f-din">12:34</span><i>简黑</i></button>
+    <div class="range-row">
+      <em class="rl">亮度</em>
+      <input type="range" id="optBright" min="40" max="120" step="5" value="100" />
+      <span id="brightVal">100%</span>
+    </div>
+    <div class="range-row">
+      <em class="rl">壁纸模糊</em>
+      <input type="range" id="optBgBlur" min="0" max="30" step="1" value="0" />
+      <span id="bgBlurVal">0px</span>
+    </div>
+    <div class="range-row">
+      <em class="rl">聚焦模糊</em>
+      <input type="range" id="optBlur" min="8" max="40" step="1" value="26" />
+      <span id="blurVal">26px</span>
     </div>
 
     <div class="sec-label">布局</div>
-    <div class="toggle-row"><span>编辑布局</span>
-      <label class="switch"><input type="checkbox" id="optEdit" /><span class="track"><i></i></span></label>
-    </div>
-    <p class="hint">开启后：拖动时钟 / 搜索框 / 每个快捷方式图标调整位置（靠近屏幕中心自动吸附），滚轮悬停可缩放。双击快捷方式图标可编辑。</p>
+    <button id="optEdit" class="ghost wide" type="button">进入编辑布局</button>
+    <p class="hint">编辑中：拖动时钟 / 日期 / 搜索框 / 每个快捷方式图标调整位置，滚轮悬停可缩放。双击快捷方式图标可编辑；吸附线拖端点旋转时会自动吸到水平 / 垂直。</p>
     <button id="resetLayout" class="ghost wide" type="button">重置布局</button>
+    <button id="addGuide" class="ghost wide" type="button">添加吸附线</button>
+    <div id="guideList" class="hist-list" style="margin-top:10px"></div>
+    <p class="hint">吸附线仅在编辑布局时显示为虚线：拖线身移动、拖两端圆点旋转角度、悬停线可删除。拖动元素靠近线时会吸附到线上，沿线自由排列（顺序由摆放位置决定，优先于居中吸附）。</p>
 
     <div class="sec-label">快捷方式</div>
     <div class="toggle-row"><span>显示名称</span>
       <label class="switch"><input type="checkbox" id="optLinkNames" checked /><span class="track"><i></i></span></label>
     </div>
+    <div class="range-row">
+      <em class="rl">图标透明度</em>
+      <input type="range" id="optTileOp" min="20" max="100" step="5" value="100" />
+      <span id="tileOpVal">100%</span>
+    </div>
+    <div class="toggle-row"><span>聚焦时向外扩散消失</span>
+      <label class="switch"><input type="checkbox" id="optRadial" /><span class="track"><i></i></span></label>
+    </div>
+    <p class="hint">开启后聚焦搜索时，图标以搜索栏为中心由近到远依次隐去；关闭则按排列顺序消失。</p>
+    <div class="toggle-row"><span>在新标签页打开</span>
+      <label class="switch"><input type="checkbox" id="optLinksTab" checked /><span class="track"><i></i></span></label>
+    </div>
+    <p class="hint">关闭则在当前页加载；按住 Ctrl / Shift 点击始终新开。每个网站一个独立图标，可单独移动缩放，聚焦搜索时自动隐去。</p>
     <div id="linkList"></div>
     <button id="addLink" class="ghost wide" type="button">添加快捷方式</button>
-    <p class="hint">每个网站一个独立图标，可单独移动缩放。图标留空时自动使用网站图标，失败则显示首字母。聚焦搜索时图标自动隐去，点击图标在新标签页打开。</p>
 
-    <div class="sec-label">搜索联想</div>
+    <div class="sec-label">搜索</div>
+    <div class="toggle-row"><span>在新标签页打开</span>
+      <label class="switch"><input type="checkbox" id="optSearchTab" checked /><span class="track"><i></i></span></label>
+    </div>
+    <div class="toggle-row"><span>仅图标模式</span>
+      <label class="switch"><input type="checkbox" id="optIconSearch" /><span class="track"><i></i></span></label>
+    </div>
+    <p class="hint">开启后搜索框收起为圆形图标，点击展开输入，失焦自动收起。</p>
+    <div class="range-row">
+      <em class="rl">搜索框宽度</em>
+      <input type="range" id="optSearchW" min="360" max="900" step="20" value="620" />
+      <span id="searchWVal">620px</span>
+    </div>
+    <div class="range-row">
+      <em class="rl">联想条目数</em>
+      <input type="range" id="optSuggestN" min="5" max="12" step="1" value="8" />
+      <span id="suggestNVal">8 条</span>
+    </div>
+    <div class="range-row">
+      <em class="rl">搜索栏透明度</em>
+      <input type="range" id="optSearchOp" min="20" max="100" step="5" value="100" />
+      <span id="searchOpVal">100%</span>
+    </div>
     <div class="toggle-row"><span>记录搜索历史</span>
       <label class="switch"><input type="checkbox" id="optHistory" checked /><span class="track"><i></i></span></label>
     </div>
-    <p class="hint">输入时会将你的历史记录置顶显示（带时钟图标），其后为 Bing 联想。在浏览器任意位置用 Bing 搜索（含地址栏、Bing 页内）都会自动记录。悬停联想条目可单独删除。</p>
+    <p class="hint">输入时历史置顶显示（带时钟图标），其后为 Bing 联想。在浏览器任意位置用 Bing 搜索（含地址栏、Bing 页内）都会自动记录，悬停联想条目可单独删除。</p>
     <div id="histList" class="hist-list"></div>
     <button id="clearHistory" class="ghost wide" type="button">清空搜索历史</button>
 
-    <div class="sec-label">时间</div>
-    <div class="toggle-row"><span>24 小时制</span>
-      <label class="switch"><input type="checkbox" id="optH24" /><span class="track"><i></i></span></label>
-    </div>
-    <div class="toggle-row"><span>显示秒数</span>
-      <label class="switch"><input type="checkbox" id="optSeconds" /><span class="track"><i></i></span></label>
-    </div>
-    <div class="toggle-row"><span>显示日期</span>
-      <label class="switch"><input type="checkbox" id="optDate" /><span class="track"><i></i></span></label>
-    </div>
-    <div id="dateStyles">
-      <button class="ds" type="button" data-style="dot"><span>2026.08.16</span><i>点阵</i></button>
-      <button class="ds" type="button" data-style="cn"><span>二〇二六年</span><i>汉字</i></button>
-      <button class="ds" type="button" data-style="slash"><span>08 / 16</span><i>斜杠</i></button>
-      <button class="ds" type="button" data-style="en"><span>SUNDAY</span><i>英文</i></button>
-    </div>
-
-    <div class="sec-label">聚焦模糊强度</div>
-    <div class="range-row">
-      <input type="range" id="optBlur" min="8" max="40" step="1" value="26" />
-      <span id="blurVal">26px</span>
-    </div>
-
-    <p class="foot">SERENE · 极简新标签页 · v1.5.0</p>
+    <p class="foot">SERENE · 极简新标签页 · v1.6.0</p>
   </aside>
 
   <!-- 快捷方式 编辑对话框 -->

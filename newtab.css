@@ -33,6 +33,8 @@ body {
   position: fixed; inset: 0; z-index: 0;
   transition: filter 0.65s var(--ease), transform 0.9s var(--ease);
   will-change: filter, transform;
+  /* 入场：从页面底色淡入壁纸（一次性，只动 opacity，合成器线程完成） */
+  animation: pageIn 0.55s ease-out backwards;
 }
 
 /* 聚焦搜索 / 打开面板 / 对话框时：背景高斯模糊 + 轻微放大暗化 */
@@ -41,6 +43,11 @@ body.panel-open #bgLayer,
 body.dialog-open #bgLayer {
   filter: blur(var(--focusBlur)) brightness(0.72) saturate(1.08);
   transform: scale(1.08);
+}
+
+/* 壁纸常驻调节：亮度 + 模糊（与聚焦时 #bgLayer 上的模糊叠加） */
+#bg, #bgVideo {
+  filter: blur(var(--bgBlur, 0px)) brightness(var(--bgBright, 1));
 }
 
 #bg {
@@ -60,6 +67,7 @@ body.dialog-open #bgLayer {
   position: fixed; inset: 0; z-index: 2; pointer-events: none;
   background:
     radial-gradient(120% 90% at 50% 38%, transparent 0%, rgba(0, 0, 0, 0.22) 62%, rgba(0, 0, 0, 0.48) 100%);
+  animation: pageIn 0.7s ease-out backwards;
 }
 
 /* 胶片颗粒 */
@@ -67,7 +75,8 @@ body.dialog-open #bgLayer {
   position: fixed; inset: -10%; z-index: 4; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: 0.05;
-  animation: grain 9s steps(8) infinite;
+  /* 入场淡入与颗粒抖动合并在同一条 animation（后者覆盖前者会失效） */
+  animation: pageIn 0.7s ease-out backwards, grain 9s steps(8) infinite;
 }
 @keyframes grain {
   0%, 100% { transform: translate(0, 0); }
@@ -82,13 +91,18 @@ body.dialog-open #bgLayer {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between;
   padding: 24px 30px;
+  /* 顶栏入场：轻微下滑浮现（等主体元素先出场） */
+  animation: topIn 0.5s var(--ease) 0.25s backwards;
 }
+@keyframes pageIn { from { opacity: 0; } }
+@keyframes topIn { from { opacity: 0; transform: translateY(-8px); } }
 .wordmark {
   font-weight: 300; font-size: 11px;
   letter-spacing: 0.55em; padding-left: 0.55em;
   color: rgba(244, 241, 232, 0.42);
   user-select: none;
 }
+body.no-mark .wordmark { visibility: hidden; }
 .icon-btn {
   width: 40px; height: 40px;
   display: grid; place-items: center;
@@ -108,9 +122,12 @@ body.dialog-open #bgLayer {
 
 .block { position: absolute; }
 
+/* 时钟关闭 */
+body.no-clock #clockGroup { display: none; }
+
 #clockGroup {
   display: flex; flex-direction: column; align-items: center;
-  left: 50%; top: 43%;
+  left: 50%; top: 38%;
   transform: translate(-50%, -50%);
 }
 
@@ -136,6 +153,13 @@ body.searching #clock { transform: scale(0.965); }
 #clock.style-light { font-family: 'Segoe UI', var(--font-ui); font-weight: 100; letter-spacing: 0.02em; }
 #clock.style-mono { font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace; font-weight: 300; font-size: clamp(4.6rem, 15.5vw, 9.6rem); }
 #clock.style-din { font-family: Bahnschrift, 'Segoe UI', var(--font-ui); font-weight: 300; letter-spacing: 0.04em; }
+
+/* 时钟加粗（需覆盖各样式的默认字重） */
+#clock.font-bold { font-weight: 600; }
+#clock.font-bold.style-serif { font-weight: 700; }
+#clock.font-bold.style-light { font-weight: 600; }
+#clock.font-bold.style-mono { font-weight: 600; }
+#clock.font-bold.style-din { font-weight: 600; }
 
 #clock .ch { width: 0.6em; text-align: center; }
 
@@ -164,44 +188,31 @@ body.searching #clock { transform: scale(0.965); }
   user-select: none;
 }
 
-/* 日期（四款样式，见 .date-dot / .date-cn / .date-slash / .date-en） */
+/* 日期（独立块：位置 / 大小 / 字体 / 格式均可自定义） */
+#dateGroup {
+  left: 50%; top: 52%;
+  transform: translate(-50%, -50%);
+  max-width: 94vw;
+}
 #dateRow {
   display: flex; align-items: center; justify-content: center;
-  margin-top: 14px;
 }
 #dateText {
   font-weight: 300; font-size: 13.5px;
   letter-spacing: 0.3em; padding-left: 0.3em;
-  color: var(--ivory-dim);
+  color: rgba(244, 241, 232, 0.88);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
   white-space: nowrap;
   transition: opacity 0.25s var(--ease);
 }
-#dateRow.date-dot #dateText {
-  letter-spacing: 0.2em; padding-left: 0.2em;
-  font-variant-numeric: tabular-nums;
-}
-#dateRow.date-cn #dateText {
-  font-family: var(--font-display);
-  font-size: 14.5px;
-  letter-spacing: 0.26em; padding-left: 0.26em;
-}
-#dateRow.date-slash #dateText {
-  font-size: 12.5px;
-  letter-spacing: 0.5em; padding-left: 0.5em;
-  font-variant-numeric: tabular-nums;
-  color: rgba(244, 241, 232, 0.5);
-}
-#dateRow.date-en #dateText {
-  font-size: 11.5px;
-  letter-spacing: 0.55em; padding-left: 0.55em;
-  text-transform: uppercase;
-  color: rgba(244, 241, 232, 0.48);
-}
+#dateText.font-bold { font-weight: 500; }
+#dateText.f-serif { font-family: 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif; }
+#dateText.f-mono { font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace; letter-spacing: 0.2em; padding-left: 0.2em; }
 
 /* ============ 搜索 ============ */
 #searchWrap {
   left: 50%; top: 63%;
-  width: min(620px, 88vw);
+  width: min(var(--searchW, 620px), 88vw);
   transform: translate(-50%, -50%);
 }
 
@@ -209,16 +220,50 @@ body.searching #clock { transform: scale(0.965); }
   display: flex; align-items: center; gap: 14px;
   height: 58px; padding: 0 22px;
   border-radius: 999px;
-  background: rgba(20, 22, 27, 0.38);
+  /* 透明度走背景 alpha（--searchOp），不能用元素 opacity —— 会创建
+     backdrop root 破坏自身的 backdrop-filter 磨砂玻璃 */
+  background: rgba(20, 22, 27, calc(0.38 * var(--searchOp, 1)));
   border: 1px solid rgba(244, 241, 232, 0.16);
   backdrop-filter: blur(22px) saturate(1.2);
   -webkit-backdrop-filter: blur(22px) saturate(1.2);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
   transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
 }
+
+/* —— 仅图标模式：收起为圆形图标，聚焦弹性展开 —— */
+body.icon-search #searchWrap { width: auto; }
+body.icon-search #searchBox {
+  width: 58px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  cursor: text;
+  transition: width 0.42s var(--spring), padding 0.42s var(--ease), gap 0.42s var(--ease),
+              background 0.35s, border-color 0.35s, box-shadow 0.35s;
+}
+body.icon-search #searchBox:focus-within {
+  width: min(var(--searchW, 620px), 88vw);
+  padding: 0 22px;
+  justify-content: flex-start;
+  gap: 14px;
+}
+body.icon-search #searchInput {
+  max-width: 0;
+  opacity: 0;
+  padding: 0;
+  transition: max-width 0.42s var(--ease), opacity 0.3s var(--ease), padding 0.42s var(--ease);
+}
+body.icon-search #searchBox:focus-within #searchInput {
+  max-width: 100%;
+  opacity: 1;
+  padding: 0 0 4px;
+}
+body.icon-search .s-ic { transition: transform 0.35s var(--spring); }
+body.icon-search #searchBox:focus-within .s-ic { transform: scale(1.12); }
+
 #searchBox:hover { border-color: rgba(244, 241, 232, 0.26); }
 #searchBox:focus-within {
-  background: rgba(23, 25, 31, 0.55);
+  background: rgba(23, 25, 31, calc(0.55 * var(--searchOp, 1)));
   border-color: rgba(244, 241, 232, 0.38);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
 }
@@ -338,6 +383,16 @@ body.searching .tile {
   transition-delay: calc(var(--i) * 16ms);
 }
 
+/* 向外扩散退场：--d 为按到搜索栏中心距离排序的逐个延迟（JS 计算），
+   总时长被钳制在 ~0.36s + 0.3s 动画 < 背景模糊的 0.65s，聚焦前完成 */
+body.radial-out.searching .tile {
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+/* 扩散模式的回归仍按原顺序错峰弹出 */
+body.radial-out:not(.searching) .tile {
+  transition-delay: calc(var(--i) * 45ms);
+}
+
 /* 内层承载入场动画，避免与定位 transform 冲突 */
 .tile-in {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -351,7 +406,9 @@ body.searching .tile {
 .tile .ic {
   width: 56px; height: 56px;
   border-radius: 16px;
-  background: rgba(20, 22, 27, 0.45);
+  /* 透明度走背景 alpha（--tileOp），不能用元素 opacity —— 会创建
+     backdrop root 破坏 .ic 自身的 backdrop-filter 磨砂玻璃 */
+  background: rgba(20, 22, 27, calc(0.45 * var(--tileOp, 1)));
   border: 1px solid rgba(244, 241, 232, 0.14);
   backdrop-filter: blur(16px) saturate(1.25);
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
@@ -385,7 +442,8 @@ body.searching .tile {
   color: var(--ivory-dim);
   max-width: 78px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  transition: color 0.3s;
+  opacity: var(--tileOp, 1);
+  transition: color 0.3s, opacity 0.3s;
 }
 .tile:hover .nm { color: var(--ivory); }
 
@@ -434,6 +492,83 @@ body.edit-mode #searchBox { pointer-events: none; }
 #guideV { left: 50%; top: 0; bottom: 0; width: 1px; }
 #guideH { top: 50%; left: 0; right: 0; height: 1px; }
 body.snap-x #guideV, body.snap-y #guideH { opacity: 0.85; }
+
+/* ============ 自定义吸附线（编辑模式专用） ============ */
+.guide {
+  --gx: 50%; --gy: 50%; --ga: 0deg;
+  position: absolute;
+  left: var(--gx); top: var(--gy);
+  width: 44vw; height: 0;
+  transform: translate(-50%, -50%) rotate(var(--ga));
+  border-top: 1.5px dashed rgba(244, 241, 232, 0.5);
+  z-index: 68;
+  display: none;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+  /* 线身命中区上下各扩 ~13px：伪元素透明加厚，不改视觉粗细 */
+}
+.guide::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: -14px; bottom: -14px;
+}
+body.edit-mode .guide { display: block; }
+.guide:hover { border-top-color: rgba(244, 241, 232, 0.85); }
+/* 吸附命中高亮 */
+.guide.hot {
+  border-top-color: #f4f1e8;
+  filter: drop-shadow(0 0 6px rgba(244, 241, 232, 0.7));
+}
+/* 两端旋转手柄（伪元素扩到 26px 命中区，好点中） */
+.g-end {
+  position: absolute; top: -5.5px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: rgba(13, 15, 19, 0.92);
+  border: 1.5px solid rgba(244, 241, 232, 0.75);
+  cursor: alias;
+}
+.g-end::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
+.g-end.l { left: -8px; }
+.g-end.r { right: -8px; }
+/* 中心拖动手柄（同样扩大命中区） */
+.g-mid {
+  position: absolute; left: 50%; top: -4px;
+  width: 8px; height: 8px; margin-left: -4px;
+  border-radius: 50%;
+  background: rgba(244, 241, 232, 0.85);
+  cursor: move;
+}
+.g-mid::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+}
+/* 删除按钮（悬停浮现） */
+.guide .g-del {
+  position: absolute; left: 50%; top: -34px;
+  transform: translateX(-50%);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(18, 20, 25, 0.92);
+  color: #e2a1a1;
+  font-size: 13px; line-height: 20px;
+  cursor: pointer;
+  opacity: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.15s, color 0.2s;
+}
+.guide:hover .g-del { opacity: 1; }
+.guide .g-del:hover { color: #efc2c2; }
 
 #editDone {
   position: fixed; left: 50%; bottom: 42px; z-index: 70;
@@ -548,7 +683,7 @@ body.panel-open #panel { transform: none; }
   color: var(--ivory-dim);
 }
 
-/* 日期样式选择 */
+/* 日期样式预设（点击填充格式串） */
 #dateStyles {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
   margin-top: 4px;
@@ -574,6 +709,12 @@ body.panel-open #panel { transform: none; }
   font-style: normal; font-size: 10.5px;
   letter-spacing: 0.2em; padding-left: 0.2em;
   color: var(--ivory-dim);
+}
+
+/* 日期字体选择（复用 .cs 卡片） */
+#dateFonts {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-top: 12px;
 }
 
 /* 快捷方式管理列表 */
@@ -741,6 +882,11 @@ body.panel-open #panel { transform: none; }
 .range-row {
   display: flex; align-items: center; gap: 14px;
   padding: 8px 2px;
+}
+.range-row .rl {
+  font-style: normal; flex-shrink: 0;
+  font-size: 12px; font-weight: 300;
+  color: rgba(244, 241, 232, 0.6);
 }
 .range-row span {
   min-width: 48px; text-align: right;

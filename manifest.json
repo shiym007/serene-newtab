@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Serene · 极简新标签页",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "极简新标签页：多样式时钟、Bing 联想与历史置顶、聚焦高斯模糊、可自定义图片/视频背景、自由布局与独立快捷方式。",
   "chrome_url_overrides": {
     "newtab": "newtab.html"

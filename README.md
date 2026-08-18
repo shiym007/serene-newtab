@@ -1,5 +1,6 @@
 <div align="center">
-![Uploading icon128.png…]()
+<img width="128" height="128" alt="icon128" src="https://github.com/user-attachments/assets/73f9acf3-be97-4e75-96f3-acfc02ad3dfb" />
+
 
 # 🌙 Serene · 极简新标签页
 

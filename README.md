@@ -1,6 +1,7 @@
 <div align="center">
 
-# 🌙 Serene · 极简新标签页
+# <img width="128" height="128" alt="icon128" src="https://github.com/user-attachments/assets/a6426034-88ab-49a6-930b-b368703a6c65" />
+ Serene · 极简新标签页
 
 **按下 Ctrl+T 的那一秒，世界安静下来。**
 

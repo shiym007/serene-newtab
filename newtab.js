@@ -146,6 +146,8 @@
   let dialogOpen = false;
   let dialogIdx = -1;         // -1 = 新增
   let dlgIconUpload = null;   // 对话框中上传的图标 data URL
+  let selectedEl = null;      // 编辑模式下选中的块（配 ＋/－ 缩放）
+  const posRegistry = new Map();  // el → {posOf, applyPos, persistNow, sMin, sMax}
 
   /* ============================================================
    * 5. 打开方式（新标签页 / 当前页，按设置）
@@ -562,6 +564,7 @@
 
   function bindDrag(elm, posOf, applyPos, persistSoon, persistNow, scaleRange) {
     const [sMin, sMax] = scaleRange || [0.5, 2.5];
+    posRegistry.set(elm, { posOf, applyPos, persistNow, sMin, sMax });
     elm.addEventListener('pointerdown', (e) => {
       if (!editMode || e.button !== 0) return;
       if (e.target.closest('.del')) return;
@@ -790,15 +793,44 @@
     body.classList.add('edit-mode');
     closePanel();
     hideSuggest();
-    toast('拖动调整位置 · 滚轮缩放 · 靠近中心自动吸附');
+    /* 触屏无滚轮：提示改用点选 + ＋/－ 缩放 */
+    const touch = matchMedia('(hover: none), (pointer: coarse)').matches;
+    toast(touch ? '拖动调整位置 · 点选后用 ＋/－ 缩放' : '拖动调整位置 · 滚轮缩放 · 靠近中心自动吸附');
   }
 
   function exitEdit() {
     editMode = false;
     body.classList.remove('edit-mode');
+    selectBlock(null);
     persist();
     dataStore.set({ links });
   }
+
+  /* ---------- 编辑模式：点击选中块，＋/－ 调整大小（触屏无滚轮的替代） ---------- */
+  function selectBlock(elm) {
+    if (selectedEl === elm) return;
+    if (selectedEl) selectedEl.classList.remove('selected');
+    selectedEl = elm || null;
+    if (selectedEl) {
+      selectedEl.classList.add('selected');
+      const e = posRegistry.get(selectedEl);
+      if (e) el.szVal.textContent = e.posOf().s.toFixed(2) + '×';
+    }
+    body.classList.toggle('has-selection', !!selectedEl);
+  }
+
+  function nudgeScale(factor) {
+    if (!selectedEl) return;
+    const e = posRegistry.get(selectedEl);
+    if (!e) return;
+    const st = e.posOf();
+    st.s = clamp(+(st.s * factor).toFixed(3), e.sMin, e.sMax);
+    e.applyPos(selectedEl, st);
+    e.persistNow();
+    el.szVal.textContent = st.s.toFixed(2) + '×';
+  }
+  el.szPlus.addEventListener('click', () => nudgeScale(1.06));
+  el.szMinus.addEventListener('click', () => nudgeScale(0.943));
 
   /* 编辑布局：按钮（进入/退出文案切换） */
   function paintEditBtn() {
@@ -933,7 +965,7 @@
   }
 
   function renderLinks() {
-    for (const { el: t } of tileEls) t.remove();
+    for (const { el: t } of tileEls) { posRegistry.delete(t); t.remove(); }
     tileEls = [];
     const frag = document.createDocumentFragment();
     links.forEach((link, i) => {
@@ -976,7 +1008,7 @@
     updateRadialDelays();
   }
 
-  /* --- 磁贴点击 / 双击 / 删除 + 吸附线删除：委托到 stage（恒定 2 个监听器） --- */
+  /* --- 磁贴点击 / 双击 / 删除 + 吸附线删除 + 块选中：委托到 stage --- */
   stage.addEventListener('click', (e) => {
     const del = e.target.closest('.g-del');
     if (del) {
@@ -985,6 +1017,11 @@
       const rec = guideEls.find((r) => r.el === gEl);
       if (rec) deleteGuide(rec.guide.id);
       return;
+    }
+    /* 编辑模式：点块选中（再点空白取消选中），选中后可用 ＋/－ 缩放 */
+    if (editMode) {
+      const blk = e.target.closest('.block');
+      selectBlock(blk || null);
     }
     const tile = e.target.closest('.tile.link');
     if (!tile) return;

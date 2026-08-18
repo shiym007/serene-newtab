@@ -1025,9 +1025,94 @@ body.edit-mode #toast { bottom: 108px; }
   to { opacity: 1; transform: none; filter: blur(0); }
 }
 
-@media (max-width: 480px) {
+/* ============ 选中元素的尺寸控制（编辑模式，触屏/桌面通用） ============ */
+#sizeCtl {
+  position: fixed; left: 50%; bottom: 112px; z-index: 71;
+  transform: translateX(-50%) translateY(8px);
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(13, 14, 18, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(244, 241, 232, 0.16);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s var(--spring);
+}
+body.edit-mode.has-selection #sizeCtl {
+  opacity: 1; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+#sizeCtl button {
+  width: 44px; height: 44px;   /* 触屏达标命中区 */
+  border: none; border-radius: 50%;
+  background: rgba(244, 241, 232, 0.1);
+  color: var(--ivory);
+  font-size: 22px; line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+#sizeCtl button:active { background: rgba(244, 241, 232, 0.25); }
+#sizeCtl span {
+  min-width: 64px; text-align: center;
+  font-size: 14px; font-weight: 300;
+  color: var(--ivory-dim);
+  font-variant-numeric: tabular-nums;
+}
+/* 选中态高亮（区别于编辑模式的虚线框） */
+body.edit-mode .block.selected {
+  outline: 2px solid rgba(244, 241, 232, 0.9) !important;
+  outline-offset: 14px;
+  border-radius: 10px;
+}
+
+/* ============ 移动端 / 触屏适配 ============ */
+html, body { overscroll-behavior: none; }        /* 禁下拉刷新/橡皮筋 */
+* { -webkit-tap-highlight-color: transparent; }
+button, .tile, .sw, .cs, .ds, .ghost, .track { touch-action: manipulation; } /* 去双击缩放延迟 */
+.sg-scroll { touch-action: pan-y; }              /* 联想列表允许纵向滑动 */
+
+/* 触屏无 hover：悬停触发的删除钮恒显，并放大命中区 */
+@media (hover: none) {
+  .sg-item .sg-x { opacity: 1; width: 30px; height: 30px; font-size: 16px; }
+  .guide .g-del { opacity: 1; width: 26px; height: 26px; font-size: 15px; line-height: 26px; top: -40px; }
+  .tile .del { width: 26px; height: 26px; font-size: 15px; line-height: 26px; }
+  .h-row button, .lk-acts button { width: 32px; height: 32px; }
+  .g-end { width: 15px; height: 15px; top: -7.5px; }
+  .g-end.l { left: -11px; }
+  .g-end.r { right: -11px; }
+  .g-mid { width: 12px; height: 12px; top: -6px; margin-left: -6px; }
+}
+
+/* 刘海屏 / 手势条安全区 */
+.topbar { padding-top: calc(24px + env(safe-area-inset-top, 0px)); }
+#editDone { bottom: calc(42px + env(safe-area-inset-bottom, 0px)); }
+#sizeCtl { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+#panel { padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px)); }
+
+/* 窄屏（手机竖屏） */
+@media (max-width: 640px) {
+  .topbar { padding: 16px 16px; padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
   #searchBox { height: 52px; }
-  .topbar { padding: 18px 20px; }
+  #searchInput { font-size: 16px; }              /* ≥16px 防 iOS 聚焦自动放大 */
+  #dateText { font-size: 12px; letter-spacing: 0.18em; padding-left: 0.18em; }
+  #dateText.f-mono { letter-spacing: 0.12em; }
   .tile { width: 62px; }
-  .tile .ic { width: 50px; height: 50px; }
+  .tile .ic { width: 52px; height: 52px; border-radius: 14px; }
+  .tile img { width: 27px; height: 27px; }
+  .tile .nm { font-size: 10.5px; max-width: 68px; }
+  #suggest { max-height: 42vh; }
+  .sg-item { padding: 14px 14px; }
+  #panel { width: min(380px, 100vw); }
+  #clockStyles, #dateStyles { gap: 8px; }
+  .hint { font-size: 11.5px; }
+}
+
+/* 更窄（小屏手机）：隐藏快捷方式名称，纯图标更清爽 */
+@media (max-width: 400px) {
+  .tile { width: 54px; }
+  .tile .ic { width: 46px; height: 46px; }
+  .tile .nm { display: none; }
 }

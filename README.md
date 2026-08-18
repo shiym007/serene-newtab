@@ -8,7 +8,7 @@
 
 > 🔒 无第三方依赖　🔒 无联网追踪　🔒 所有数据留在本地
 
-![version](https://img.shields.io/badge/version-1.6.0-8a7f6a) ![manifest](https://img.shields.io/badge/Manifest-V3-4a6b8c) ![license](https://img.shields.io/badge/license-MIT-56806a)
+![version](https://img.shields.io/badge/version-1.7.0-8a7f6a) ![manifest](https://img.shields.io/badge/Manifest-V3-4a6b8c) ![license](https://img.shields.io/badge/license-MIT-56806a)
 
 </div>
 

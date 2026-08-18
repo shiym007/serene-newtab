@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>新标签页</title>
   <link rel="stylesheet" href="newtab.css" />
 </head>
@@ -55,8 +55,13 @@
   <div id="guideV" aria-hidden="true"></div>
   <div id="guideH" aria-hidden="true"></div>
 
-  <!-- 布局编辑模式的完成按钮 -->
+  <!-- 布局编辑模式的完成按钮 / 选中元素尺寸控制（触屏友好） -->
   <button id="editDone" type="button">完成布局</button>
+  <div id="sizeCtl">
+    <button id="szMinus" type="button" aria-label="缩小">−</button>
+    <span id="szVal">1.00×</span>
+    <button id="szPlus" type="button" aria-label="放大">＋</button>
+  </div>
 
   <div id="scrim"></div>
 
@@ -145,7 +150,7 @@
 
     <div class="sec-label">布局</div>
     <button id="optEdit" class="ghost wide" type="button">进入编辑布局</button>
-    <p class="hint">编辑中：拖动时钟 / 日期 / 搜索框 / 每个快捷方式图标调整位置，滚轮悬停可缩放。双击快捷方式图标可编辑；吸附线拖端点旋转时会自动吸到水平 / 垂直。</p>
+    <p class="hint">编辑中：拖动时钟 / 日期 / 搜索框 / 每个快捷方式图标调整位置；滚轮悬停可缩放，触屏点选元素后用 ＋/－ 按钮缩放。双击快捷方式图标可编辑；吸附线拖端点旋转时会自动吸到水平 / 垂直。</p>
     <button id="resetLayout" class="ghost wide" type="button">重置布局</button>
     <button id="addGuide" class="ghost wide" type="button">添加吸附线</button>
     <div id="guideList" class="hist-list" style="margin-top:10px"></div>
@@ -201,7 +206,7 @@
     <div id="histList" class="hist-list"></div>
     <button id="clearHistory" class="ghost wide" type="button">清空搜索历史</button>
 
-    <p class="foot">SERENE · 极简新标签页 · v1.6.0</p>
+    <p class="foot">SERENE · 极简新标签页 · v1.7.0</p>
   </aside>
 
   <!-- 快捷方式 编辑对话框 -->

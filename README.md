@@ -142,7 +142,7 @@ serene-newtab/
 ## 🧑‍💻 开发说明
 
 - **MV3 + 原生 JS**，不引入任何库
-- 💾 双存储策略：设置走 `storage.sync`，大文件与历史走 `storage.local`
+- 💾 双存储策略：设置走 `storage.sync`（跨设备同步），大文件与历史走 `storage.local`
 - ⚡ 性能细节：拖动 `requestAnimationFrame` 合帧 + 仅更新被拖元素；列表渲染用事件委托 + `DocumentFragment` 批量插入；日期串按天缓存，避免每秒重复计算
 - 🌐 直接双击 `newtab.html` 可预览（自动回退 `localStorage`），但联想接口与内容脚本需在扩展环境中生效
 
